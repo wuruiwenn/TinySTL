@@ -12,4 +12,4 @@
       - 对象的处理：construct(placement new机制)、destroy(逐级调用，trivial destructor判断)
       - 内存的处理：采用，双层配置器
         - 第一级配置器：malloc_alloc_template：4个函数：allocate(包括 oom_xx)、reallocate(包括 oom_xx)、deallocate(直接调用free)，set_new_handler机制；
-        - 第二级配置器：default_alloc_template：union，free list(解决小额内存块分配形成的碎片问题)，内存池
+        - 第二级配置器：default_alloc_template：union，free list(解决小额内存块分配形造成的碎片问题)，内存池
