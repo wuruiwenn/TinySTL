@@ -13,10 +13,10 @@ project(TinySTL) #项目名字
 
 set(CXX STANDARD 11) #设置C++语言标准
 
-# include_directories(implementation test) # 用来指定头文件的搜索路径
+# include_directories(impl test) # 用来指定头文件的搜索路径
 include_directories(test) 
 
-# aux_source_directory(implementation src_file_1) #将指定目录下的源文件列表存放到变量中
+# aux_source_directory(impl src_file_1) #将指定目录下的源文件列表存放到一个变量中
 aux_source_directory(test src_file_2) 
 
 
