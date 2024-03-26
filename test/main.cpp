@@ -1,7 +1,6 @@
-#include"../impl/std_allocator.h"
+#include"../impl/STL_SD/stl_sd_allocator_interface.h"
 
 int main()
 {
-    foo();
-    cout << "1+1 = 2" << endl;
+
 }

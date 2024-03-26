@@ -13,7 +13,7 @@
 #include <iostream> // for cerr
 
 
-namespace my_sd_alloc
+namespace mystl
 {
     template<class T1, class T2>
     inline void _construct(T1* ptr, const T2& val)
@@ -21,12 +21,12 @@ namespace my_sd_alloc
         new (ptr) T1(val);//placement new
     }
     template<class T>
-    inline void _destroy(T* ptr) // User* pr;
+    inline void _destroy(T* ptr) // User* uptr;
     {
         ptr->~T();
     }
     template<class T>
-    T* _allocate(size_t n, T* hint)//书里面参数是(ptrdiff_t n,T*)，这里T*应该是忽略了参数的名字，C++允许这样的，因为这里我只需要类型计算sizeof即可，所以不需要指定名字
+    inline T* _allocate(size_t n, T* hint)//书里面参数是(ptrdiff_t n,T*)，这里T*应该是忽略了参数的名字，C++允许这样的，因为这里我只需要类型计算sizeof即可，所以不需要指定名字
     {
         T* p = (T*)::operator new(size_t(n * sizeof(T)));//我觉得这里用 operator new还是malloc无所谓，operator new本质就是调用malloc，只是一层包裹
         if (p == 0)
