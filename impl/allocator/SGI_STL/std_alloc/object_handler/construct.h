@@ -1,6 +1,6 @@
 
 /*
-    SGI STL 分配器：std::alloc关于 <对象的处理>
+    SGI STL 分配器：std::alloc，的，关于 <对象的处理>
     SGI STL 源码中， <对象的处理> 存于文件 <stl_construct.h>
     主要就2个函数：construct、destroy，负责目标对象的构建和析构
     construct：运用placement new机制
@@ -49,7 +49,9 @@ inline void destroy_one(T* ptr, std::false_type)//可选被调函数-2
 template<class ForwardIterator>
 inline void destroy(ForwardIterator first, ForwardIterator last)//总体函数
 {
-    destroy_lst(first, last, value_type(first));
+    // destroy_lst(first, last, value_type(first));
+    destroy_lst(first, last,
+        std::is_trivially_destructible<typename iterator_traits<ForwardIterator>::value_type>{});
 }
 
 

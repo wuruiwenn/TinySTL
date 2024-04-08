@@ -17,6 +17,7 @@ set(CXX STANDARD 11) #设置C++语言标准
 include_directories(test) 
 
 # aux_source_directory(impl src_file_1) #将指定目录下的源文件列表存放到一个变量中
+# aux，auxiliary，辅助
 aux_source_directory(test src_file_2) 
 
 
