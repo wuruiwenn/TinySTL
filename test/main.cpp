@@ -1,8 +1,8 @@
 
-
-#include"../impl/allocator/STL_SD/stl_sd_allocator_interface.h"
+#include"test.h"
+using namespace test_collections;
 
 int main()
 {
-
+    test_stl_sd_interface();
 }
