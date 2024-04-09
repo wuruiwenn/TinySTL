@@ -73,15 +73,15 @@ CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o: CMakeFiles/TinySTL_output_exe
 CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o: ../test/main.cpp
 CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o: CMakeFiles/TinySTL_output_exe.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/riven/Learn_in_Linux_Environment/TinySTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o -MF CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o.d -o CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o -c /home/riven/Learn_in_Linux_Environment/TinySTL/test/main.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o -MF CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o.d -o CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o -c /home/riven/Learn_in_Linux_Environment/TinySTL/test/main.cpp
 
 CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/riven/Learn_in_Linux_Environment/TinySTL/test/main.cpp > CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/riven/Learn_in_Linux_Environment/TinySTL/test/main.cpp > CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.i
 
 CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/riven/Learn_in_Linux_Environment/TinySTL/test/main.cpp -o CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/riven/Learn_in_Linux_Environment/TinySTL/test/main.cpp -o CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.s
 
 # Object files for target TinySTL_output_exe
 TinySTL_output_exe_OBJECTS = \

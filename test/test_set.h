@@ -1,6 +1,8 @@
 #include"../impl/allocator/STL_SD/stl_sd_allocator_interface.h"
+#include"../impl/allocator/SGI_STL/std_alloc/object_handler/construct.h"
 
-using namespace mystl;
+
+using namespace wrwSTL;
 using std::cout;
 using std::endl;
 
@@ -27,7 +29,7 @@ namespace test_collections
         //内存分配
         my_stl_sd_allocator<Entity, int> giver;
         void* p = nullptr;
-        Entity* e = giver.allocate(5, p);
+        Entity* e = giver.allocate(5);
         cout << "丨===> allocate分配的内存的首地址 e = " << e << endl;
 
         //在这个地址上构建目标对象
@@ -41,5 +43,9 @@ namespace test_collections
         //释放该内存块
         giver.deallocate(e);
         cout << "丨===> 该地址上deallocate释放内存后：" << (*e);
+    }
+
+    inline void test_std_alloc_construct() {
+
     }
 }

@@ -4,70 +4,64 @@
     SGI STL 源码中， <对象的处理> 存于文件 <stl_construct.h>
     主要就2个函数：construct、destroy，负责目标对象的构建和析构
     construct：运用placement new机制
-    destroy：判断析构trivial destructor，逐级调用
+    destroy：2种类型，析构一个对象，析构迭代器指定区间内多个对象：
+                判断析构trivial destructor，逐级调用
 */
-#ifndef CONSTRUCT_H
-#define CONSTRUCT_H
+#ifndef _CONSTRUCT_H
+#define _CONSTRUCT_H
 
 #include<new>
 #include"type_traits.h"
-// ==================construct：构造对象==========================
-template<class T1, class T2>
-inline void construct(T1* ptr, const T2& val)
+
+namespace wrwSTL
 {
-    new (ptr) T1(val);
-}
-// ==================construct==========================
-
-
-// ==================destroy：将对象析构==========================
-
-//类型-1：仅析构一个指针指向的对象
-template<class T>
-inline void destroy(T* ptr)//总体函数
-{
-    destroy_one(ptr, std::is_trivially_destructible<T>{});
-    //当然这里可以用if来处理，只不过不够优雅
-}
-
-template<class T>
-inline void destroy_one(T* ptr, std::true_type)//可选被调函数-1
-{
-}
-
-template<class T>
-inline void destroy_one(T* ptr, std::false_type)//可选被调函数-2
-{
-    if (ptr != nullptr)
+    // ==================construct：构造对象==========================
+    // placement new 机制
+    template<class T, class S>
+    inline void construct(T* ptr, const S& val)
     {
-        ptr->~T();
+        new (ptr) T(val);
     }
-}
 
 
-//类型-2：析构指定迭代器区间内的对象
-template<class ForwardIterator>
-inline void destroy(ForwardIterator first, ForwardIterator last)//总体函数
-{
-    // destroy_lst(first, last, value_type(first));
-    destroy_lst(first, last,
-        std::is_trivially_destructible<typename iterator_traits<ForwardIterator>::value_type>{});
-}
+    // ==================destroy：将对象析构==========================
 
-
-template<class ForwardIterator>//可选被调函数-1
-inline void destroy_lst(ForwardIterator first, ForwardIterator last, std::true_type)
-{
-}
-template<class ForwardIterator>//可选被调函数-2
-inline void destroy_lst(ForwardIterator first, ForwardIterator last, std::false_type)
-{
-    for (;first < last;++first)
+    //类型-1：仅析构一个指针指向的对象
+    template<class T>
+    inline void destroy(T* ptr)
     {
-        //first是迭代器，迭代器指向对象就是容器内的元素，
-        //destroy()需接收地址，所以要继续取地址
-        destroy_one(&*first);
+        destroy_one(ptr, is_POD_type());//判断是不是平凡析构，是的话，不用任何处理
     }
+
+    template<class T>
+    inline void destroy_one(T* ptr, _true_type) {}
+
+    template<class T>
+    inline void destroy_one(T* ptr, _false_type) {
+        if (ptr != nullptr) {
+            ptr->~T();
+        }
+    }
+
+    //类型-2：析构迭代器指定区间内的多个对象
+    template<class ForwardIterator>
+    inline void destroy(ForwardIterator first, ForwardIterator last)
+    {
+        typedef typename _type_traits<ForwardIterator>::is_POD_type is_POD_type;
+        destroy_lst(first, last, is_POD_type());
+    }
+
+    template<class ForwardIterator>
+    inline void destroy_lst(ForwardIterator first, ForwardIterator last, _true_type) {
+
+    }
+    template<class ForwardIterator>
+    inline void destroy_lst(ForwardIterator first, ForwardIterator last, _false_type) {
+        for (;first != last;++first) {
+            destroy_one(&*first, _false_type);
+        }
+    }
+
 }
 
 

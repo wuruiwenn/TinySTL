@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o -o TinySTL_output_exe 
+/usr/bin/g++ -g CMakeFiles/TinySTL_output_exe.dir/test/main.cpp.o -o TinySTL_output_exe 

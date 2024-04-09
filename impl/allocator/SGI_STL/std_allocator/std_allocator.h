@@ -4,12 +4,14 @@
     2个函数：allocate、deallocate
     分别是对operator new、operator delete的包装
 
-    和原始STL标准规定的分配器接口函数是一样的。
-    当然，是我自己的理解，看侯捷的书，也是这样的，不过这不重要。
+    和原始STL标准规定的分配器接口函数，几乎就是一样的。
+    当然，是我自己的理解，看侯捷的书，也是这样的。
+
+    测试：略了。
 */
 
-#ifndef STD_ALLOCATOR
-#define STD_ALLOCATOR
+#ifndef _SGI_STD_ALLOCATOR_
+#define _SGI_STD_ALLOCATOR_
 
 #include <new>  // for placement new
 #include <cstddef>// for ptrdiff_t
@@ -17,57 +19,46 @@
 #include <climits> // for UNIX_MAX
 #include <iostream> // for cerr
 
-namespace mystl
+namespace wrwSTL
 {
     template<class T>
-    inline T* allocate(size_t n)
-    {
-        void* p = ::operator new(sizeof(T));
-        if (p == 0)
-        {
+    inline T* allocate(size_t n, T*) {
+        void* p = ::operator new(n * sizeof(T));
+        if (p == 0) {
             cerr << "out of memory.\n";
             exit(0);
         }
         return p;
     }
     template<class T>
-    inline void deallocate(T* ptr)
-    {
+    inline void deallocate(T* ptr) {
         ::operator delete(ptr);
     }
-    template<class T1, class T2>
-    inline void construct(T1* ptr, const T2& val)
-    {
-        new (ptr) T1(val);
+    template<class T, class S>
+    inline void construct(T* ptr, const S& val) {
+        new (ptr) T(val);
     }
     template<class T>
-    inline void destroy(T* ptr)
-    {
+    inline void destroy(T* ptr) {
         ptr->~T();
     }
 
-    template<class T>
-    class allocator
+    template<class T, class S>
+    class sgi_std_allocator
     {
-        typedef T* pointer;
     public:
-        void construct(pointer ptr, const T& val)
-        {
+        void construct(T* ptr, const S& val) {
             _construct(ptr, val);
         }
-        void destroy(pointer ptr)
-        {
+        void destroy(T* ptr) {
             _destroy(ptr);
         }
-        void deallocate(pointer ptr)
-        {
+        void deallocate(T* ptr) {
             _deallocate(ptr);
         }
-        pointer allocate(size_t n, const void* hint = 0)
-        {
-            _allocate(n, (pointer)0);
+        T* allocate(size_t n, const void* hint = 0) {
+            _allocate(n, (T*)0);
         }
     };
 }
-
 #endif
