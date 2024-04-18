@@ -38,7 +38,8 @@ namespace wrwSTL
     inline void destroy_one(T* ptr, _true_type) {}
 
     template<class T>
-    inline void destroy_one(T* ptr, _false_type) {
+    inline void destroy_one(T* ptr, _false_type)
+    {
         if (ptr != nullptr) {
             ptr->~T();
         }
