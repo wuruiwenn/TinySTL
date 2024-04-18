@@ -5,23 +5,15 @@
 #define _TYPE_TRAITS_H_
 
 
-namespace wrwSTL {
+namespace wrwSTL
+{
+    struct _true_type {
+        // xx
+    };
 
-    namespace {
-        template<bool, class Ta, class Tb>
-        struct IfThenElse;
-        template<class Ta, class Tb>
-        struct IfThenElse < true, Ta, Tb > {
-            using result = Ta;
-        };
-        template<class Ta, class Tb>
-        struct IfThenElse < false, Ta, Tb > {
-            using result = Tb;
-        };
-    }
-
-    struct _true_type { };
-    struct _false_type { };
+    struct _false_type {
+        // xxx 
+    };
 
     /*
     ** 萃取传入的T类型的类型特性
@@ -33,9 +25,13 @@ namespace wrwSTL {
         typedef _false_type		has_trivial_copy_constructor;
         typedef _false_type		has_trivial_assignment_operator;
         typedef _false_type		has_trivial_destructor;
-        typedef _false_type		is_POD_type;
+
+        //这里本质都是定义"模板别名"，用typedef、using都可以
+        // typedef _false_type		is_POD_type;
+        using is_POD_type = _false_type;
     };
 
+    //以下是一些内置类型的 traits模板特化
     template<>
     struct _type_traits<bool>
     {
@@ -253,11 +249,6 @@ namespace wrwSTL {
         typedef _true_type		has_trivial_destructor;
         typedef _true_type		is_POD_type;
     };
-
 }
 
-
-
-
-
-#endif // !_TYPE_TRAITS_H_
+#endif

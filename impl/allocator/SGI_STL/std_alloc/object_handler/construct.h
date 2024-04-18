@@ -30,6 +30,7 @@ namespace wrwSTL
     template<class T>
     inline void destroy(T* ptr)
     {
+        using is_POD_type = typename _type_traits<T>::is_POD_type;
         destroy_one(ptr, is_POD_type());//判断是不是平凡析构，是的话，不用任何处理
     }
 
@@ -48,6 +49,7 @@ namespace wrwSTL
     inline void destroy(ForwardIterator first, ForwardIterator last)
     {
         typedef typename _type_traits<ForwardIterator>::is_POD_type is_POD_type;
+        // using is_POD_type = typename _type_traits<ForwardIterator>::is_POD_type;
         destroy_lst(first, last, is_POD_type());
     }
 
@@ -58,7 +60,7 @@ namespace wrwSTL
     template<class ForwardIterator>
     inline void destroy_lst(ForwardIterator first, ForwardIterator last, _false_type) {
         for (;first != last;++first) {
-            destroy_one(&*first, _false_type);
+            destroy_one(&*first, _false_type());
         }
     }
 
