@@ -63,16 +63,6 @@ namespace wrwSTL
             destroy_one(&*first, _false_type());
         }
     }
-
 }
-
-
-
-
-
-
-
-
-// ==================destroy==========================
 
 #endif
