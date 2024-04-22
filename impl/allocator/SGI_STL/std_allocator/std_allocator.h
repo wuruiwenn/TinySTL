@@ -12,11 +12,18 @@
     operator new / operator delete
 
     但是对于对象的处理，好像没有给出函数哇。
-    后来我参考了Github其他小伙伴对于TinySTL的实现，发现对于std::allocator
-    的实现，是调用了 construct.h，因为construct.h在侯捷书里面其实是std::alloc
+    后来我参考了 Github 其他小伙伴对于类似的 TinySTL 的实现，发现对于 std::allocator
+    的实现，是调用了 construct.h，因为 construct.h 在侯捷书里面其实是 std::alloc
     分配器中的内容，所以我就觉得很奇怪。
-    所以，实际应该确实如此，std::allocator的实现也是基于construct.h的
+    所以，实际应该确实如此，std::allocator 的实现也是基于construct.h的
     即关于<对象的构造>的内容。
+
+    以下是以header-only形式实现std::allocator的，即没有使用 .h和.cpp文件配对的方法
+    本质上来说，这样会产生重定义问题，因为这里类方法是在类外用类作用域符号::实现的
+    所以我加了 inline，避免重定义问题
+    （实际也不会产生重定义问题，因为只会在test中include当前文件，为了规范，还是加了。）
+
+    已测试。
 */
 
 #ifndef _SGI_STD_ALLOCATOR_
@@ -28,22 +35,63 @@
 #include <climits> // for UNIX_MAX
 #include <iostream> // for cerr
 
+// 要引入 construct.h，用来构造/析构 对象
 #include"../std_alloc/object_handler/construct.h"
 
 namespace wrwSTL
 {
+    //类allocator的声明
     template<class T>
     class allocator
     {
     public:
-        static T* allocate(size_t n, T*);
+        static T* allocate();//分胚一个目标对象的内存
+        static T* allocate(size_t n);//分配指定个数个目标对象的内存
         static void deallocate(T* ptr);
+
         static void construct(T* ptr, const T& val);
         static void destroy(T* ptr);
         static void destroy(T* first, T* last);
     };
-}
 
+    //类allocator的定义(实现)
+    template<class T>
+    inline T* allocator<T>::allocate() {
+        return static_cast<T*>(::operator new(sizeof(T)));
+    }
+
+    template<class T>
+    inline T* allocator<T>::allocate(size_t n) {
+        if (n == 0) {
+            return nullptr;
+        }
+        return static_cast<T*>(::operator new(n * sizeof(T)));
+    }
+
+    template<class T>
+    inline void allocator<T>::deallocate(T* ptr) {
+        ::operator delete(ptr);
+    }
+
+    template<class T>
+    inline void allocator<T>::construct(T* ptr, const T& val) {
+        // new(ptr) T(val);
+        // wrwSTL::construct<T, T>(ptr, val);
+        wrwSTL::construct(ptr, val);//经过测试，这里加不加模板都没问题，应该是默认给加上了的
+    }
+
+    template<class T>
+    inline void allocator<T>::destroy(T* ptr) {
+        wrwSTL::destroy<T>(ptr);
+        // wrwSTL::destroy(ptr);
+    }
+
+    template<class T>
+    inline void allocator<T>::destroy(T* first, T* last) {
+        wrwSTL::destroy(first, last);
+    }
+}
+#endif
 
 // namespace wrwSTL
 // {
@@ -87,4 +135,3 @@ namespace wrwSTL
 //         }
 //     };
 // }
-#endif

@@ -13,7 +13,7 @@ project(TinySTL) #项目名字
 
 set(CXX STANDARD 11) #设置C++语言标准
 
-# include_directories(impl test) # 用来指定头文件的搜索路径
+# include_directories(impl test) # 用来指定头文件（.h）的搜索路径
 include_directories(test) 
 
 # aux_source_directory(impl src_file_1) #将指定目录下的源文件列表存放到一个变量中
@@ -22,4 +22,4 @@ aux_source_directory(test src_file_2)
 
 
 # add_executable(TinySTL_output_exe ${src_file_1} ${src_file_2})  # 使用指定的源文件来生成目标可执行文件
-add_executable(TinySTL_output_exe ${src_file_2})
+add_executable(tinySTL_EXE ${src_file_2})

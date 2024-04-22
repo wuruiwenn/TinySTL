@@ -21,12 +21,12 @@
 namespace wrwSTL
 {
     template<class T, class S>
-    void _construct(T* p, const S& val)//对象构建
+    inline void _construct(T* p, const S& val)//对象构建
     {
         new (p) T(val);
     }
     template<class T>
-    void _destroy(T* ptr)//对象销毁
+    inline void _destroy(T* ptr)//对象销毁
     {
         ptr->~T();
     }
