@@ -40,7 +40,7 @@
 
 namespace wrwSTL
 {
-    //类allocator的声明
+    //类 std::allocator 的声明
     template<class T>
     class allocator
     {
@@ -54,7 +54,7 @@ namespace wrwSTL
         static void destroy(T* first, T* last);
     };
 
-    //类allocator的定义(实现)
+    //类 std::allocator 的定义(实现)
     template<class T>
     inline T* allocator<T>::allocate() {
         return static_cast<T*>(::operator new(sizeof(T)));
@@ -77,7 +77,7 @@ namespace wrwSTL
     inline void allocator<T>::construct(T* ptr, const T& val) {
         // new(ptr) T(val);
         // wrwSTL::construct<T, T>(ptr, val);
-        wrwSTL::construct(ptr, val);//经过测试，这里加不加模板都没问题，应该是默认给加上了的
+        wrwSTL::construct(ptr, val);//经过测试，这里加不加模板都没问题，应该是会默认给加上的
     }
 
     template<class T>
