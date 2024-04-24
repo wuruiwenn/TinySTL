@@ -2,6 +2,8 @@
 
 // std::alloc对外暴露的接口
 // 就是std::alloc最终被外部应该如何使用呢？
+// 这里就相当于定义一个供外部使用的 应用接口
+
 // STL中是在原始std::alloc外层包裹了一层class simple_alloc的方式，把真正的std::alloc实现源码隐藏起来了
 // 这个simple_alloc就相当于一个对外暴露的接口，这个接口，才是真正被其他，比如vector容器内部，所使用的
 // 因而，在class vector{}内部实现中，首先要 #include "alloc_external_expose_interface.h"
@@ -21,7 +23,6 @@ typedef wrwSTL::alloc_2 alloc;
 namespace wrwSTL
 {
     //simple_alloc是如何接收外部实现的alloc的呢？
-    // 这里就相当于定义一个供外部使用的 应用接口
 
     //如果simple_alloc被决定实现为一个 函数，则可以通过函数形参的方式传入alloc【这种最简单，在一般的C++编程中也用的多】
 
