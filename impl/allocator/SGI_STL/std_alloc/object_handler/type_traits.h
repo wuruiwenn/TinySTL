@@ -195,6 +195,10 @@ namespace wrwSTL
         typedef _true_type		has_trivial_destructor;
         typedef _true_type		is_POD_type;
     };
+    // 可以直接继承实现特化：
+    // template<class T>
+    // struct _type_traits<const T*> :_type_traits<T*> {};
+
     template<>
     struct _type_traits<char*>
     {
@@ -248,6 +252,29 @@ namespace wrwSTL
         typedef _true_type		has_trivial_assignment_operator;
         typedef _true_type		has_trivial_destructor;
         typedef _true_type		is_POD_type;
+    };
+
+    //类型处理:remove_const、remove_reference
+    //这里并没用到，如果要使用，则要定义一个 降级的struct：type_traits_helper
+    template<class T>
+    struct remove_const {
+        using type = T;
+    };
+    template<class T>
+    struct remove_const<const T> {
+        using type = T;
+    };
+
+    template<class T>
+    struct remove_reference {
+        using type = T;
+    };
+    template<class T>
+    struct remove_reference<T&> {
+        using type = T;
+    };
+    template<class T>
+    struct _type_traits_helper :_type_traits<typename remove_const<typename remove_reference<T>::type>::type> {
     };
 }
 
