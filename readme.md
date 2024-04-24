@@ -16,7 +16,7 @@
 3. `std::alloc`分配器中的一些全局编程架构的方案
 - `SGI STL`中对于`std::alloc`的双层配置器是使用 `USE_MALLO`宏来控制对外暴露哪一个的
   - 所以，我在文件 `global_control.h`中进行了这些全局宏的设定，相当于是一个用于接口暴露的控制
-- 此外，在实现`std::alloc`后，我需要单独写一个文件`alloc_external_expose_interface.h`来实现一个 应用程序的接口，就是对实现的 `std::alloc`进行整合，在实际的`SGI STL`中的 `类simple_alloc`就是对应该文件的内容
+- 此外，在实现`std::alloc`后，我需要单独写一个文件`alloc_external_expose_interface.h`来实现一个 应用程序的接口，就是对实现的 `std::alloc`进行整合，给外部进行实际应用，在实际的`SGI STL`中的 `类simple_alloc`就是对应该文件的内容
   - 所以，`alloc_external_expose_interface.h`文件做2件事：
     - 根据全局控制`global_control.h` 中 `USE_MALLOC`宏来配置全局唯一对外的 `alloc`是用的哪一级配置器
     - 使用 `class template`实现`simple_alloc`，使用模板参数的方式传入外部的实际`alloc`，对该`alloc`的内部方法，进一步封装一下
