@@ -20,3 +20,4 @@
   - 所以，`alloc_external_expose_interface.h`文件做2件事：
     - 根据全局控制`global_control.h` 中 `USE_MALLOC`宏，使用`typedef`，来配置全局唯一对外的 `alloc`是用的哪一级配置器
     - 使用 `class template`实现`simple_alloc`，使用模板参数的方式传入外部的实际`alloc`，对该`alloc`的内部方法，进一步封装一下
+---
