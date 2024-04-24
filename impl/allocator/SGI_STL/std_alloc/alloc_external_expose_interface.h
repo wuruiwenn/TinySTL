@@ -21,6 +21,7 @@ typedef wrwSTL::alloc_2 alloc;
 namespace wrwSTL
 {
     //simple_alloc是如何接收外部实现的alloc的呢？
+    // 这里就相当于定义一个供外部使用的 应用接口
 
     //如果simple_alloc被决定实现为一个 函数，则可以通过函数形参的方式传入alloc【这种最简单，在一般的C++编程中也用的多】
 
