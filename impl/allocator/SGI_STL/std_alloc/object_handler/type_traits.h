@@ -254,8 +254,9 @@ namespace wrwSTL
         typedef _true_type		is_POD_type;
     };
 
+    //对于上述一些特化，本质就是枚举所有类型，但也可以用类型处理的方法实现
     //类型处理:remove_const、remove_reference
-    //这里并没用到，如果要使用，则要定义一个 降级的struct：type_traits_helper
+    //STL中并没用到，如果要使用，则要定义一个 降级的struct：type_traits_helper
     template<class T>
     struct remove_const {
         using type = T;
