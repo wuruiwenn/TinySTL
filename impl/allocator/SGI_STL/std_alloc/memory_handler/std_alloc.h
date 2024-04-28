@@ -15,16 +15,23 @@
 #ifndef _STD_ALLOC_H_
 #define _STD_ALLOC_H_
 
+#include<new>
+
 namespace wrwSTL
 {
-    class alloc_1
+    /*第一层配置器
+        4个函数：
+        allocate、deallocate、reallocate、set_newHandler
+    */
+    class malloc_alloc_template
     {
 
     };
 
-    class alloc_2 {
+    class default_alloc_template //第二层配置器
+    {
 
-    }
+    };
 }
 
 

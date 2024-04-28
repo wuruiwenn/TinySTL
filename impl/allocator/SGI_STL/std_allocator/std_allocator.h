@@ -77,7 +77,8 @@ namespace wrwSTL
     inline void allocator<T>::construct(T* ptr, const T& val) {
         // new(ptr) T(val);
         // wrwSTL::construct<T, T>(ptr, val);
-        wrwSTL::construct(ptr, val);//经过测试，这里加不加模板都没问题，应该是会默认给加上的
+        wrwSTL::construct(ptr, val);
+        //经过测试，这里加不加模板都没问题，应该是会默认给加上的
     }
 
     template<class T>

@@ -13,7 +13,7 @@
         - 第一级配置器：malloc_alloc_template：4个函数：allocate(包括 oom_xx)、reallocate(包括 oom_xx)、deallocate(直接调用free)，set_new_handler机制；
         - 第二级配置器：default_alloc_template：union，free list(解决小额内存块分配形造成的碎片问题)，内存池
 ---
-**<font size=5 color=GREEN>3. `SGI STL std::alloc`分配器中的一些全局编程架构的方案**</font> 
+**<font size=3 color=GREEN>3. `SGI STL std::alloc`分配器中的一些全局编程架构的方案**</font> 
 - `SGI STL`中对于`std::alloc`的双层配置器是使用 `USE_MALLO`宏来控制对外暴露哪一个的
   - 所以，我在文件 `global_control.h`中进行了这些全局宏的设定，相当于是一个用于接口暴露的控制
 - 此外，在实现`std::alloc`后，我需要单独写一个文件`alloc_external_expose_interface.h`来实现一个 应用程序的接口，就是对实现的 `std::alloc`进行整合，给外部进行实际应用，在实际的`SGI STL`中的 `类simple_alloc`就是对应该文件的内容

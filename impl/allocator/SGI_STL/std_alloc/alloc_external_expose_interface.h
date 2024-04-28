@@ -15,9 +15,9 @@
 #include "./memory_handler/std_alloc.h" 
 
 #ifdef _USE_MALLOC
-typedef wrwSTL::alloc_1 alloc;
+typedef wrwSTL::malloc_alloc_template alloc;
 #else
-typedef wrwSTL::alloc_2 alloc;
+typedef wrwSTL::default_alloc_template alloc;
 #endif
 
 namespace wrwSTL
@@ -29,10 +29,15 @@ namespace wrwSTL
     //如果simple_alloc被决定实现为一个 class，则只能使用模板T的方式传入alloc
     //【这种更加规范，利用template参数】
     //【template传入参数T，是一种类型】
-    //【因为是通过类型T调用，所以外部实现只能是static成员、嵌套类型 这2种】
+    //【因为 函数是通过类型T调用，
+    // 所以，外部的alloc的函数的实现只能是static成员、嵌套类型 这2种】
+    //【这样的话，才能通过 T:: 来调用】
+
     //【所以这里若要用class simple_alloc来接收外部的分配器的话，】
     //【则对应的双层配置器class的内部函数实现要定义为static函数才行】
-    //【实际SGI STL std::alloc中确实是这样的】
+    //【因为std::alloc的双层配置器都是class，
+    // 所以实际SGI STL std::alloc中对外接口simple_alloc也只能用class template实现】
+    //【从而通过template T把std::alloc传进来进行一层封装】
 
     template<class T, class Alloc>
     class simple_alloc
