@@ -3,7 +3,8 @@
     SGI STL 分配器：std::alloc，的，关于 <内存的处理>
     SGI STL 源码中， <内存的处理> 存于文件 <stl_alloc.h>
 
-    关于 内存的处理，采用双层配置器：整体使用宏定义 USE_MALLOC 来配置全局使用哪一层配置器
+    关于 <内存的处理>，采用-双层配置器：
+        整体使用宏定义 USE_MALLOC 来配置全局使用哪一层配置器
 
     第一层配置器：malloc_alloc_template：
         4个函数，allocate，reallocate，deallocate，set_new_handler
@@ -16,6 +17,8 @@
 #define _STD_ALLOC_H_
 
 #include<new>
+#include<cstddef> // for size_t
+#include<cstdlib> // for free()
 
 namespace wrwSTL
 {
@@ -25,10 +28,41 @@ namespace wrwSTL
     */
     class malloc_alloc_template
     {
+    private:
+        static void* oom_alloc(size_t n);
+        static void* oom_realloc(void* loc, size_t n);
+    public:
+        //内存分配
+        //本质调用底层：malloc()
+        static void* allocate(size_t n) {
+            void* ret = malloc(n);
+            if (ret == 0) {//C++11之前，使用0或NULL来标识空指针
+                ret = oom_alloc(n);
+            }
+            return ret;
+        }
+        //内存释放
+        //本质调用底层：free()
+        static void deallocate(void* p) {
+            free(p);
+        }
+        //内存重分配
+        //本质调用底层：realloc()
+        //一般用于：在指定地址上扩展内存
+        static void* reallocate(void* loc, size_t new_n) {
+            void* ret = realloc(loc, new_n);
+            if (ret == NULL) {
+                ret = oom_realloc(loc, new_n);
+            }
+            return ret;
+        }
 
     };
 
-    class default_alloc_template //第二层配置器
+    /*
+        第二层配置器
+    */
+    class default_alloc_template
     {
 
     };

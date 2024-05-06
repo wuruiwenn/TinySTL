@@ -14,7 +14,7 @@
     但是对于对象的处理，好像没有给出函数哇。
     后来我参考了 Github 其他小伙伴对于类似的 TinySTL 的实现，发现对于 std::allocator
     的实现，是调用了 construct.h，因为 construct.h 在侯捷书里面其实是 std::alloc
-    分配器中的内容，所以我就觉得很奇怪。
+    分配器中的，关于对象的处理，的内容，所以我就觉得很奇怪。
     所以，实际应该确实如此，std::allocator 的实现也是基于construct.h的
     即关于<对象的构造>的内容。
 
