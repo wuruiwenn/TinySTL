@@ -30,7 +30,7 @@ namespace wrwSTL
     template<class T>
     inline void destroy(T* ptr)
     {
-        using is_POD_type = typename _type_traits<T>::has_trivial_destructor;
+        using has_trivial_destructor = typename _type_traits<T>::has_trivial_destructor;
         destroy_one(ptr, has_trivial_destructor());//判断是不是平凡析构，是的话，不用任何处理
     }
 
