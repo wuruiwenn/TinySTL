@@ -5,16 +5,16 @@
 
     关于 <内存的处理>，采用-双层配置器：
         整体使用宏定义 USE_MALLOC 来配置全局使用哪一层配置器
+        （默认使用第二层配置器，更高效）
 
     第一层配置器：malloc_alloc_template：
         4个函数，allocate，reallocate，deallocate，set_new_handler
     第二层配置器：default_alloc_template：
-        整体上2个函数：allocate(包括refill)，deallocate。
+        整体上2个函数：allocate(包括refill)，deallocate
                         union，free_list，内存池
 */
 
-#ifndef _STD_ALLOC_H_
-#define _STD_ALLOC_H_
+#pragma once
 
 #include<new>
 #include<cstddef> // for size_t
@@ -23,6 +23,11 @@
 
 namespace wrwSTL
 {
+    enum { ALIGN = 8 };	//小型区块的上调边界
+    enum { MAX_BYTES = 128 }; //小型区块的上限
+    enum { NFREELISTS = MAX_BYTES / ALIGN }; //N个，即free-list个数
+
+
     /*第一层配置器
         4个函数：
         allocate、deallocate、reallocate、set_new_handler
@@ -31,6 +36,7 @@ namespace wrwSTL
     {
     private:
         //处理内存不足情况的几个函数
+        //源码中，没太懂它为什么这里要声明，而不是直接实现，显然是可以直接类内实现的，除了这个函数指针的初始化
         static void* oom_alloc(size_t n);
         static void* oom_realloc(void* loc, size_t n);
         //声明一个函数指针，该指针指向一个 返回值为void，无任何形参类型的函数
@@ -64,8 +70,9 @@ namespace wrwSTL
         }
     };
 
-    //第一层配置器所需的oom_xxx()函数具体实现
+    //第一层配置器所需的oom_xxx()函数-类外部-具体实现
     // static void* oom_alloc(size_t n);
+    // static void* oom_realloc(void* loc, size_t n);
     // static void (*malloc_alloc_oom_handler_ptr)();
 
     // 在类外部，初始化类内的这个函数指针
@@ -122,10 +129,27 @@ namespace wrwSTL
     */
     class default_alloc_template
     {
+    private:
+        //将输入字节数bytes上调至8的倍数
+        static size_t round_up(size_t b) {
+            return (((b)+ALIGN - 1) & ~(ALIGN - 1));
+            // 等价于：return ((b + ALIGN - 1) / ALIGN) * ALIGN;
+        }
+        //根据输入字节数bytes，返回应该使用16个free_list中的哪一个free_list
+        // free_list[16] = [8 16 24 32 40 48 56 64 72 80 88 96 104 112 120 128]
+        // 下标从0开始
+        static size_t free_list_indx(size_t b) {
 
+        }
+    private:
+        //内存块节点的基本结构
+        //每个内存块节点，都是一个union
+        union obj {
+            obj* free_list_next;
+            char client_data[1];
+        };
     };
 }
 
-#endif
 
 
