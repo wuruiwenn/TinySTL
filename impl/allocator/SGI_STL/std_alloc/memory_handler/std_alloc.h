@@ -23,11 +23,6 @@
 
 namespace wrwSTL
 {
-    enum { ALIGN = 8 };	//小型区块的上调边界
-    enum { MAX_BYTES = 128 }; //小型区块的上限
-    enum { NFREELISTS = MAX_BYTES / ALIGN }; //N个，即free-list个数
-
-
     /*第一层配置器
         4个函数：
         allocate、deallocate、reallocate、set_new_handler
@@ -124,31 +119,78 @@ namespace wrwSTL
     }
 
 
+
     /*
         第二层配置器
     */
     class default_alloc_template
     {
+    private://需要的一些全局量
+        enum { ALIGN = 8 };	//小型区块的上调边界
+        enum { MAX_BYTES = 128 }; //小型区块的上限
+        enum { NFREELISTS = MAX_BYTES / ALIGN }; //N个，即free-list个数
+    private:
+        //内存块节点的基本结构
+        //每个内存块节点，都是一个union
+        union obj {
+            obj* next;
+            char client_data[1];
+        };
+        // 整体是16个链表，每个链表用一个头结点obj来表达
+        // 这里数组存的是每个链表的头结点的指针
+        static obj* free_list[NFREELISTS];
     private:
         //将输入字节数bytes上调至8的倍数
         static size_t round_up(size_t b) {
-            return (((b)+ALIGN - 1) & ~(ALIGN - 1));
-            // 等价于：return ((b + ALIGN - 1) / ALIGN) * ALIGN;
+            return (((b)+ALIGN - 1) & ~(ALIGN - 1));// 等价于：return ((b + ALIGN - 1) / ALIGN) * ALIGN;
         }
         //根据输入字节数bytes，返回应该使用16个free_list中的哪一个free_list
         // free_list[16] = [8 16 24 32 40 48 56 64 72 80 88 96 104 112 120 128]
         // 下标从0开始
         static size_t free_list_indx(size_t b) {
-
+            return (round_up(b) / ALIGN) - 1;
         }
-    private:
-        //内存块节点的基本结构
-        //每个内存块节点，都是一个union
-        union obj {
-            obj* free_list_next;
-            char client_data[1];
-        };
+    public:
+        static void* allocate(size_t n);//分配内存
+        static void* refill(size_t n);
+        static void deallocate(void* p, size_t n);//释放内存
+        // static void* reallocate(void* p, size_t old_sz, size_t new_sz);//内存重新分配
     };
+
+    //第二层配置器内部static函数，类外实现
+    inline void* default_alloc_template::allocate(size_t n) {
+        if (n > (size_t)MAX_BYTES) {
+            return malloc_alloc_template::allocate(n);
+        }
+        //从free_list[]上取内存块
+        size_t i = free_list_indx(n);
+        obj* objHead = free_list[i];//free_list[]本身存的就是obj*，这样相当于把地址赋给左边
+        if (objHead == 0) {//若free_list[i]上的链表头部没有可用内存块
+            return refill(round_up(n));
+        }
+        //调整头结点
+        //这里的objHead要么用二级指针，要么只能用free_list[i]来更新头结点
+        //因为objHead是一个拷贝，更新objHead并不能实地更新free_list，你更新的是一个拷贝的变量
+        //但是如果这个拷贝的变量void** objHead是一个二级指针，则可以用*objHead来更新头结点
+        //原始的SGI STL这里的代码就是用二级指针
+        free_list[i] = objHead->next;//free_list[i]就是此时的链表上的头结点(的地址)
+        return objHead;
+    }
+    inline void default_alloc_template::deallocate(void* p, size_t n) {
+        if (n > (size_t)MAX_BYTES) {
+            malloc_alloc_template::deallocate(p);
+            return;
+        }
+        //把p指向的内存块，接到free_list上适当位置，即回收内存
+        //把节点插入链表的头部
+        size_t i = free_list_indx(n);
+        obj* pnew = (obj*)p;
+        pnew->next = free_list[i];//free_list[i]就是当前的头结点(的指针)(obj*)
+        free_list[i] = pnew;
+    }
+
+
+
 }
 
 
