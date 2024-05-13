@@ -128,7 +128,8 @@ namespace wrwSTL
     private://需要的一些全局量
         enum { ALIGN = 8 };	//小型区块的上调边界
         enum { MAX_BYTES = 128 }; //小型区块的上限
-        enum { NFREELISTS = MAX_BYTES / ALIGN }; //N个，即free-list个数
+        enum { NFREELISTS = MAX_BYTES / ALIGN }; // N个，即free-list个数
+        enum { NObjs = 20 };// 每次增加的节点数
     private:
         //内存块节点的基本结构
         //每个内存块节点，都是一个union
@@ -152,13 +153,33 @@ namespace wrwSTL
         }
     public:
         static void* allocate(size_t n);//分配内存
-        static void* refill(size_t n);
         static void deallocate(void* p, size_t n);//释放内存
         // static void* reallocate(void* p, size_t old_sz, size_t new_sz);//内存重新分配
+        //为free_list的链表填充新的内存块，新的内存块取自内存池
+        //返回一个大小为n的obj对象，并有可能会被挂到free_list的链表上去
+        static void* refill(size_t n);
+        static char* chunk_alloc(size_t n, size_t& nobjs);
+    private:
+        static char* start_free;//内存池起始位置
+        static char* end_free;//内存池结束位置
+        static size_t heap_size;//申请 heap 空间附加值大小
     };
 
+    //初始化类的成员属性
+    using alloc = default_alloc_template;
+    alloc::obj* alloc::free_list[alloc::NFREELISTS] = {
+        nullptr,nullptr,nullptr,nullptr,
+        nullptr,nullptr,nullptr,nullptr,
+        nullptr,nullptr,nullptr,nullptr,
+        nullptr,nullptr,nullptr,nullptr,
+    };
+    char* alloc::start_free = nullptr;
+    char* alloc::end_free = nullptr;
+    size_t alloc::heap_size = 0;
+
+
     //第二层配置器内部static函数，类外实现
-    inline void* default_alloc_template::allocate(size_t n) {
+    inline void* alloc::allocate(size_t n) {
         if (n > (size_t)MAX_BYTES) {
             return malloc_alloc_template::allocate(n);
         }
@@ -178,7 +199,7 @@ namespace wrwSTL
         free_list[i] = objHead->next;
         return objHead;
     }
-    inline void default_alloc_template::deallocate(void* p, size_t n) {
+    inline void alloc::deallocate(void* p, size_t n) {
         if (n > (size_t)MAX_BYTES) {
             malloc_alloc_template::deallocate(p);
             return;
@@ -189,6 +210,22 @@ namespace wrwSTL
         obj* pnew = (obj*)p;
         pnew->next = free_list[i];//free_list[i]就是当前的头结点(的指针)(obj*)
         free_list[i] = pnew;
+    }
+
+    void* alloc::refill(size_t n) {
+        size_t nobjs = NObjs;
+        char* chunk = chunk_alloc(n, nobjs);
+        //chunk_alloc只拿到一个内存块，则直接返回给调用者，无需挂到free_list的链表上
+        if (nobjs == 1) {
+            return chunk;
+        }
+
+        //否则，要把新获得的内存块，依次挂到free_list链表上去
+        // size_t i = free_list_indx(n);
+    }
+
+    char* alloc::chunk_alloc(size_t n, size_t& nobjs) {
+
     }
 
 
