@@ -173,7 +173,9 @@ namespace wrwSTL
         //因为objHead是一个拷贝，更新objHead并不能实地更新free_list，你更新的是一个拷贝的变量
         //但是如果这个拷贝的变量void** objHead是一个二级指针，则可以用*objHead来更新头结点
         //原始的SGI STL这里的代码就是用二级指针
-        free_list[i] = objHead->next;//free_list[i]就是此时的链表上的头结点(的地址)
+        // objHead->next;
+        // free_list[i] = (*objHead).next;//free_list[i]就是此时的链表上的头结点(的地址)
+        free_list[i] = objHead->next;
         return objHead;
     }
     inline void default_alloc_template::deallocate(void* p, size_t n) {
@@ -188,7 +190,6 @@ namespace wrwSTL
         pnew->next = free_list[i];//free_list[i]就是当前的头结点(的指针)(obj*)
         free_list[i] = pnew;
     }
-
 
 
 }
