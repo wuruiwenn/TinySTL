@@ -215,13 +215,37 @@ namespace wrwSTL
     void* alloc::refill(size_t n) {
         size_t nobjs = NObjs;
         char* chunk = chunk_alloc(n, nobjs);
-        //chunk_alloc只拿到一个内存块，则直接返回给调用者，无需挂到free_list的链表上
+
+        //如果chunk_alloc只拿到一个内存块，则直接返回给调用者，无需挂到free_list的链表上
         if (nobjs == 1) {
             return chunk;
         }
+        //否则，把一个区块给调用者，剩下的挂到 free_list上作为新节点
 
-        //否则，要把新获得的内存块，依次挂到free_list链表上去
-        // size_t i = free_list_indx(n);
+        //第0个内存块，作为结果返回给客户端
+        obj* ret = (obj*)(chunk + 0);
+        //从第1个内存块开始，开始依次挂到free_list上去
+
+        //注意一个问题，refill(n)：n是所需分配的字节数
+        //nobjs是分配得到的内存块数，每个内存块占n个字节空间
+
+        //先找到应该把新节点挂到free_list哪个位置：free_list[i]
+        //然后初始化该位置上的头结点是谁
+        //这里是设定将chunk的第1个内存块，作为新的挂到free_list[i]上的头结点
+        //chunk往后移动n个字节，正好就是第1个内存块
+        size_t i = free_list_indx(n);
+        free_list[i] = (obj*)(chunk + n);
+
+        //对于剩余的获取的内存块，依次挂到free_list[i]链表上去
+        //链表操作：
+        obj* cur_obj = nullptr;//标识当前节点
+        obj* next_obj = nullptr;//标识下一个节点
+
+
+
+        // cur_obj = (obj*)(chunk + n);
+
+        return ret;
     }
 
     char* alloc::chunk_alloc(size_t n, size_t& nobjs) {
