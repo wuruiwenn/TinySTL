@@ -223,7 +223,7 @@ namespace wrwSTL
         //否则，把一个区块给调用者，剩下的挂到 free_list上作为新节点
 
         //第0个内存块，作为结果返回给客户端
-        obj* ret = (obj*)(chunk + 0);
+        obj* ret = (obj*)(chunk);
         //从第1个内存块开始，开始依次挂到free_list上去
 
         //注意一个问题，refill(n)：n是所需分配的字节数
@@ -238,13 +238,20 @@ namespace wrwSTL
 
         //对于剩余的获取的内存块，依次挂到free_list[i]链表上去
         //链表操作：
-        obj* cur_obj = nullptr;//标识当前节点
-        obj* next_obj = nullptr;//标识下一个节点
-
-
-
-        // cur_obj = (obj*)(chunk + n);
-
+        obj* cur_obj = nullptr;//标识当前新链表的尾结点是谁，实时更新
+        cur_obj = (obj*)(chunk);
+        for (int i = 1;;++i) {
+            obj* tmp = (obj*)((char*)cur_obj + n);//标识当前访问节点的下一个，即等待插入的新节点
+            if (i == nobjs - 1) {//如果是最后一个新节点
+                cur_obj->next = tmp;
+                tmp->next = nullptr;
+                break;
+            }
+            else {
+                cur_obj->next = tmp;
+                cur_obj = tmp;
+            }
+        }
         return ret;
     }
 
