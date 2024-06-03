@@ -173,8 +173,12 @@ namespace wrwSTL
         nullptr,nullptr,nullptr,nullptr,
         nullptr,nullptr,nullptr,nullptr,
     };
+
+    // start_free、end_free用来标记内存池中大块内存的起始与末尾位置
     char* alloc::start_free = nullptr;
     char* alloc::end_free = nullptr;
+
+    // 用来记录该空间配置器alloc已经向<系统堆>索要了多少的内存块
     size_t alloc::heap_size = 0;
 
 
@@ -255,11 +259,79 @@ namespace wrwSTL
         return ret;
     }
 
+    //chunk_alloc做的就是：从内存池中取内存块，给free_list用
+    //参数n：客户端申请分配的字节数
+    //参数nobjs：引用传递，实际能够从内存池中取得的内存块的数量，默认20，实际不一定
     char* alloc::chunk_alloc(size_t n, size_t& nobjs) {
+        size_t total_need_bytes = n * nobjs;//挂到free_list上的总的字节数，这个值是用来更新内存池的大小的
+        size_t pool_left = end_free - start_free;//当前内存池中剩余的未使用字节数
+        char* ret;//返回申请内存空间的首地址
+        if (pool_left >= total_need_bytes) {//内存池剩余空间完全满足需要
+            ret = start_free;
+            start_free = start_free + total_need_bytes;
+            //total_need_bytes是需要被分配出去的，即已分配。
+            // 内存池内容是未分配的，所以需要更新内存池的起点，往后滑动，滑过的内容表示它已经不属于内存池的内容了，而是挂到free_list上了，后续可以被申请分配了
+            // 跳过已分配的内存块，确保下次新的请求分配是从新的位置开始
+            // 这就是内存池的优势：有效地减少了频繁的系统调用，提高了小块内存分配的效率。
+            // 只需要更新内存池的有效起点即可
+            return ret;
+        }
+        else if (pool_left >= n) {//内存池资源不足，但是仍可满足本次分配的需求，足够供应一个或以上的区块
+            nobjs = pool_left / n;
+            total_need_bytes = nobjs * n;
+            ret = start_free;
+            start_free = start_free + total_need_bytes;//更新内存池的起点
+            return ret;
+        }
+        else {
+            // 内存池空间不足，连一块小块内存都不能提供，不能满足内存分配的需求
+            // 则向 <系统堆> 求助，<先往内存池中补充空间，然后返回内存申请的需求>
 
+            //首先，最大化利用内存池的内存
+            //这个if可不要，只是为了最大化利用内存空间，把内存池仅有的很少的内存块，挂到free_list上去
+            // 如果内存池有剩余空间(该空间一定是8的整数倍)，将该空间挂到free_list对应哈希桶中
+            if (pool_left > 0) {
+                //把这个内存池中的仅有的内存块，挂到 free_list上去
+                int i = free_list_indx(pool_left);
+                ((obj*)start_free)->next = free_list[i];
+                free_list[i] = (obj*)start_free;
+            }
+
+
+            // 正式通过系统堆向内存池补充空间，如果补充成功，递归继续分配
+
+            // 应该往内存池中补充多少内存呢？
+            // 计算向内存中补充空间大小：本次空间总大小两倍 + 向系统申请总大小/16
+            // 为什么*2，为什么+，只是一种方案而已，
+            // 主要是想从 堆 中请求足够的内存来 <扩展内存池>，防止后续频繁的内存申请
+            size_t bytes_to_get = 2 * total_need_bytes + round_up(heap_size >> 4);
+
+            //malloc就是从堆中申请内存
+            start_free = (char*)::malloc(bytes_to_get);
+            if (start_free) {//如果从堆中申请内存成功
+                heap_size += bytes_to_get;
+                end_free = start_free + bytes_to_get;
+                //内存池起点，结束位置已经更新完毕，可以重新进行chunk_alloc分配内存了
+                return chunk_alloc(n, nobjs);
+            }
+            //如果从堆申请内存，都失败了
+            //若通过<系统堆>补充空间失败，则方案是：去free_list中找是否有还未使用的较大的内存块，有的话，拿来放入内存池用
+            //即找比所需内存字节数n大的内存块，还有没有
+            //因为执行到这，块大小为n的内存块肯定是没有的，就找有没有更大的
+            for (int s = n;s <= MAX_BYTES;s += ALIGN) {
+                int i = free_list_indx(s);
+                obj* p = free_list[i];
+                if (0 != p) {
+                    //则p应该被拿来用于内存池，所以free_list当前链表的头结点得更新
+                    free_list[i] = p->next;
+                    start_free = (char*)p;
+                    end_free = start_free + s;
+                    return chunk_alloc(n, nobjs);
+                }
+            }
+
+        }
     }
-
-
 }
 
 
