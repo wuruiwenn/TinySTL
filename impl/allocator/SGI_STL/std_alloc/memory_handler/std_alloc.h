@@ -216,6 +216,11 @@ namespace wrwSTL
         free_list[i] = pnew;
     }
 
+    //注意传入的参数n
+    //这里表达意义是：allocate分配字节数为n的内存块，free_list上没有
+    //因而需要执行refill(具体应该是chunk_alloc)，
+    // 从内存池中取 <nobjs个> <大小为n> 的内存块来接到free_list上
+    // 所以实际上从内存池取的数据量应该是 = nobjs*n 个字节
     void* alloc::refill(size_t n) {
         size_t nobjs = NObjs;
         char* chunk = chunk_alloc(n, nobjs);
@@ -307,6 +312,8 @@ namespace wrwSTL
             size_t bytes_to_get = 2 * total_need_bytes + round_up(heap_size >> 4);
 
             //malloc就是从堆中申请内存
+            //从 <堆中> 申请内存，放入内存池，此时内存池完全是空的
+            // 所以应该更新内存池的首部+尾部，start_free、end_free
             start_free = (char*)::malloc(bytes_to_get);
             if (start_free) {//如果从堆中申请内存成功
                 heap_size += bytes_to_get;
@@ -318,9 +325,12 @@ namespace wrwSTL
             //若通过<系统堆>补充空间失败，则方案是：去free_list中找是否有还未使用的较大的内存块，有的话，拿来放入内存池用
             //即找比所需内存字节数n大的内存块，还有没有
             //因为执行到这，块大小为n的内存块肯定是没有的，就找有没有更大的
+
+            //从 <free_list上> 取下可用内存块，放入内存池，此时内存池完全是空的
+            // 所以，应该更新内存池的首部+尾部，start_free、end_free
             for (int s = n;s <= MAX_BYTES;s += ALIGN) {
                 int i = free_list_indx(s);
-                obj* p = free_list[i];
+                obj* p = free_list[i];//p是当前可用的内存块，可放入内存池中利用
                 if (0 != p) {
                     //则p应该被拿来用于内存池，所以free_list当前链表的头结点得更新
                     free_list[i] = p->next;
