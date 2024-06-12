@@ -339,7 +339,6 @@ namespace wrwSTL
                     return chunk_alloc(n, nobjs);
                 }
             }
-
         }
     }
 }
