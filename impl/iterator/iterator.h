@@ -9,12 +9,20 @@
 namespace wrwSTL
 {
     /*
-     ================================================================
-     =          迭代器 traits，相当于一种工具，具体的迭代器见后续下方
-     ================================================================
-     */
+        ================================================================
+            顶层的5种迭代器
+        ================================================================
+    */
 
-     //对上述5种类型的迭代器，实现 类型萃取 
+    //仅仅是空壳，用于进一步实现具体的5种迭代器
+    struct input_iterator_tag {};
+    struct output_iterator_tag {};
+    struct forward_iterator_tag : public input_iterator_tag {};
+    struct bidirectional_iterator_tag : public forward_iterator_tag {};
+    struct random_access_iterator_tag : public bidirectional_iterator_tag {};
+
+
+    // iterator 基本模板
     template<class Category,
         class T,
         class Distance = ptrdiff_t,
@@ -28,10 +36,20 @@ namespace wrwSTL
         typedef Reference	reference;
     };
 
+    /*
+        ================================================================
+            迭代器 traits，相当于一种工具
+        ================================================================
+     */
+
+     //对上述5种类型的迭代器，实现 类型萃取 
+
+
     //iterator_traits：是为了萃取出 迭代器 的特性
     //type_traits：是为了萃取出 类型 的特性
     template <class Iterator>
-    struct iterator_traits {
+    struct iterator_traits
+    {
         typedef typename Iterator::iterator_category iterator_category;	//迭代器类型
         typedef typename Iterator::value_type        value_type;			// 迭代器所指对象的类型
         typedef typename Iterator::difference_type   difference_type;		// 两个迭代器之间的距离
@@ -62,38 +80,10 @@ namespace wrwSTL
         typedef const T& reference;
     };
 
-    template<class Iterator>
-    inline typename iterator_traits<Iterator>::iterator_category iterator_category(const Iterator& It)
-    {
-        typedef typename iterator_traits<Iterator>::iterator_category category;
-        return category();
-    }
-
-    template<class Iterator>
-    inline typename iterator_traits<Iterator>::value_type* value_type(const Iterator& It) {
-        return static_cast<typename iterator_traits<Iterator>::value_type*>(0);
-    }
-
-    template<class Iterator>
-    inline typename iterator_traits<Iterator>::difference_type* difference_type(const Iterator& It) {
-        return static_cast<typename iterator_traits<Iterator>::difference_type*>(0);
-    }
-
     /*****************************************************************************************/
 
-    /*
-        ================================================================
-        ==    顶层的5种迭代器
-        ================================================================
-    */
 
-    struct input_iterator_tag {};
-    struct output_iterator_tag {};
-    struct forward_iterator_tag : public input_iterator_tag {};
-    struct bidirectional_iterator_tag : public forward_iterator_tag {};
-    struct random_access_iterator_tag : public bidirectional_iterator_tag {};
-
-    //5类迭代器源码
+    // 5类 迭代器 具体实现
     template <class T, class Distance>
     struct input_iterator
     {
@@ -199,8 +189,7 @@ namespace wrwSTL
         distance：用于计算迭代器间的距离
     */
 
-    //首先是最外层的接口函数
-
+    //首先是最外层的接口函数:distance()
     template <class InputIterator>
     typename iterator_traits<InputIterator>::difference_type distance(InputIterator first, InputIterator last)
     {
@@ -233,4 +222,30 @@ namespace wrwSTL
     }
 
     /*****************************************************************************************/
+
+    /*
+        萃取迭代器的特性：value_type，distance
+    */
+
+    //萃取某个迭代器的 value_type
+    template<class Iterator>
+    inline typename iterator_traits<Iterator>::value_type* value_type(const Iterator& iter)
+    {
+        return static_cast<typename iterator_traits<Iterator>::value_type*>(0);
+    }
+
+    // 萃取某个迭代器的 distance_type
+    template <class Iterator>
+    inline typename iterator_traits<Iterator>::difference_type* distance_type(const Iterator& iter)
+    {
+        return static_cast<typename iterator_traits<Iterator>::difference_type*>(0);
+    }
+
+    // 萃取某个迭代器的 category
+    template <class Iterator>
+    inline typename iterator_traits<Iterator>::iterator_category iterator_category(const Iterator& iter)
+    {
+        typedef typename iterator_traits<Iterator>::iterator_category Category;
+        return Category();
+    }
 }
