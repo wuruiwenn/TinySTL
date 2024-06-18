@@ -43,6 +43,7 @@
         "limits": "cpp",
         "new": "cpp",
         "numbers": "cpp",
-        "stdexcept": "cpp"
+        "stdexcept": "cpp",
+        "cassert": "cpp"
     }
 }

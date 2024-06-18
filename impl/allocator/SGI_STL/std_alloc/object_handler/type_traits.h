@@ -19,7 +19,7 @@ namespace wrwSTL
     ** 萃取传入的T类型的类型特性
     */
     template<class T>
-    struct _type_traits
+    struct _type_traits //这里是用 类型别名 的方式定义嵌套类型，也可以用继承的方法实现：struct type_traits:false_type{}
     {
         typedef _false_type		has_trivial_default_constructor;
         typedef _false_type		has_trivial_copy_constructor;
