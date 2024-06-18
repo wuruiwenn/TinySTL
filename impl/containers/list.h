@@ -16,6 +16,11 @@ namespace wrwSTL
     template<class T>
     struct list_node;
 
+    //node_traits
+    //相当于一个工具类、中间件
+    //专门用于节点类的类型萃取，而节点类是list的基础
+    //例如，可以这样：typedef Node<T>* NodePtrType;
+    //那么在class list中就可以进一步萃取：typedef typename node_traits<T>::NodePtrType _NodePtrType;
     template<class T>
     struct node_traits {
         typedef list_node_base<T>* base_ptr;
