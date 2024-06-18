@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/tinySTL_EXE.dir/test/test_main.cpp.o -o tinySTL_EXE 
