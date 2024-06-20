@@ -6,6 +6,8 @@
 
 #include"../iterator/iterator.h"
 #include"../exception/exceptdef.h"
+#include"../allocator/SGI_STL/std_allocator/std_allocator.h" //第一种分配器
+#include"../allocator/SGI_STL/std_alloc/alloc_external_expose_interface.h" //第二种分配器
 
 namespace wrwSTL
 {
@@ -138,11 +140,20 @@ namespace wrwSTL
     };
 
 
-    template<class T>
+    template<class T, class Alloc = alloc>
     class list
     {
+    private:
+        typedef typename node_traits<T>::base_ptr base_ptr;
+    private:
+        typedef list_iterator<T> iterator;//属于list的迭代器
+        typedef simple_alloc<T, Alloc> allocator_type;
+    private:
+        base_ptr head;//头结点
+        int size;
+    public:
 
-    }
+    };
 }
 
 
