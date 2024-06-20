@@ -10,6 +10,8 @@
 namespace wrwSTL
 {
     //一些前置操作，主要是traits
+
+    //声明
     template<class T>
     struct list_node_base;
 
@@ -56,7 +58,8 @@ namespace wrwSTL
         typedef typename node_traits<T>::base_ptr base_ptr;
         typedef typename node_traits<T>::node_ptr node_ptr;
 
-        T value;
+        T value;//节点的内容
+
         list_node(T&& v)
             :value(std::move(v))
         {}
