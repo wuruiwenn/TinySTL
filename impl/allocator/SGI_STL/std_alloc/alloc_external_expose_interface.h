@@ -19,6 +19,9 @@
 //引入实际的分配器实现
 #include "./memory_handler/std_alloc.h" 
 
+//引入实际的对象处理construct
+#include "./construct.h"
+
 #ifdef _USE_MALLOC_
 typedef wrwSTL::malloc_alloc_template alloc;
 #else
@@ -71,4 +74,35 @@ namespace wrwSTL
             }
         }
     };
+
+    /*
+        定义一个默认的分配器，默认采用alloc作为内存分配器的分配器
+        作为对外的一个默认分配器的接口
+    */
+    template<class T>
+    class default_allocator {
+    public:
+        //内存处理
+        static T* allocate(size_t n) {
+            return (n == 0) ? (0 : (T*)alloc::allocate(n * sizeof(T)));
+        }
+        static T* allocate(void) {
+            return (T*)alloc::allocate(sizeof(T));
+        }
+        static void deallocate(T* ptr) {
+            return alloc::deallocate(ptr, sizeof(T));
+        }
+        static void deallocate(T* ptr, size_t n) {
+            if (n != 0) {
+                return alloc::deallocate(ptr, n * sizeof(T));
+            }
+        }
+        //对象的构建
+        // static void construct() {
+        //     return wrwSTL::construct();
+        // }
+        // 这个地方可能有问题，外部default_allocator需要传入2个参数，一个是关于内存分配的T
+        //     一个是 对象构建的参数S，参数S可能还必须是一个 Args...可变参数
+        //     比如是构建User对象，那需要传入 名字，年龄，地址等
+    }
 }
