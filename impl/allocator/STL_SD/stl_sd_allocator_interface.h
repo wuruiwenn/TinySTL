@@ -3,8 +3,6 @@
     原始STL所规定的一个标准的分配器所应该具备的所有接口，
     这里只实现4个核心函数，即4个接口：
     allocate、deallocate、construct、destroy
-
-    已测试。
 */
 
 
@@ -16,7 +14,7 @@
 #include <cstdlib> // for exit
 #include <climits> // for UNIX_MAX
 #include <iostream> // for cerr
-
+#include"../../uitls/utils.h"
 
 namespace wrwSTL
 {
@@ -25,6 +23,17 @@ namespace wrwSTL
     {
         new (p) T(val);
     }
+    template<class T, class S>//一些重载
+    inline void _construct(T* p)
+    {
+        new(p) T();
+    }
+    template<class T, class... Args>
+    inline void _construct(T* p, Args... args)
+    {
+        new(p) T(wrwSTL::forward<Args>(args)...);
+    }
+
     template<class T>
     inline void _destroy(T* ptr)//对象销毁
     {
@@ -37,7 +46,7 @@ namespace wrwSTL
         T* p = (T*)(::operator new(n * sizeof(T)));
         if (p == 0)
         {
-            std::cout << "out of memory Error.\n";
+            std::cout << "[Error]: out of memory.\n";
             exit(1);
         }
         return p;
