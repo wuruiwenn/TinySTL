@@ -18,8 +18,9 @@
 
 namespace wrwSTL
 {
+    /***************************对象构建****************************** */
     template<class T, class S>
-    inline void _construct(T* p, const S& val)//对象构建
+    inline void _construct(T* p, const S& val)
     {
         new (p) T(val);
     }
@@ -28,8 +29,8 @@ namespace wrwSTL
     {
         new(p) T();
     }
-    template<class T, class... Args>
-    inline void _construct(T* p, Args... args)
+    template<class T, class... ArgsType>
+    inline void _construct(T* p, ArgsType... args)
     {
         new(p) T(wrwSTL::forward<Args>(args)...);
     }
@@ -40,6 +41,7 @@ namespace wrwSTL
         ptr->~T();
     }
 
+    /***************************内存处理****************************** */
     template<class T>
     inline T* _allocate(size_t n, T*)//内存分配，这里也可以不指定参数的，C++允许
     {
@@ -76,10 +78,20 @@ namespace wrwSTL
         void construct(T* ptr, const S& val) {//对象构建
             _construct(ptr, val);
         }
+        void construct(T* ptr) {
+            _construct(ptr);
+        }
+
+        //特殊在class基础上加一个模板
+        template<class... ArgsType>
+        void construct(T* ptr, ArgsType... args) {
+            _construct(ptr, args);
+        }
+
         void destroy(T* ptr) {//对象销毁
             _destroy(ptr);
         }
     };
-}
+} //namspace wrwSTL
 
 #endif

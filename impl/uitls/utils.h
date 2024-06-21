@@ -39,4 +39,4 @@ namespace wrwSTL
     T&& forward(typename wrwSTL::remove_reference<T>::type& arg) noexcept {
         return static_cast<T&&>(arg);
     }
-}
+} // namespace wrwSTL

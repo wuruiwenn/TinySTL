@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/riven/Learn_in_Linux_Environment/TinySTL/build",
-  "command": "/usr/bin/g++  -I/home/riven/Learn_in_Linux_Environment/TinySTL/test -g -o CMakeFiles/tinySTL_EXE.dir/test/test_main.cpp.o -c /home/riven/Learn_in_Linux_Environment/TinySTL/test/test_main.cpp",
-  "file": "/home/riven/Learn_in_Linux_Environment/TinySTL/test/test_main.cpp"
-}
-]
