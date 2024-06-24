@@ -5,34 +5,37 @@
     如：完美转发forward，move
  */
 #include <cstddef>
+#include"../impl/allocator/SGI_STL/std_alloc/object_handler/type_traits.h"
 
 namespace wrwSTL
 {
     /*************实现 std::remove_reference****************/
-    template<class T>
-    struct remove_reference {
-        using type = T;
-    };
+    //type_traits.h中已经实现
+    // template<class T>
+    // struct remove_reference {
+    //     using type = T;
+    // };
 
-    template<class T>
-    struct remove_reference<T&> {
-        using type = T;
-    };
+    // template<class T>
+    // struct remove_reference<T&> {
+    //     using type = T;
+    // };
 
-    template<class T>
-    struct remove_reference<T&&> {
-        using type = T;
-    };
+    // template<class T>
+    // struct remove_reference<T&&> {
+    //     using type = T;
+    // };
 
     /**************实现std::remove_const***************** */
-    template<class T>
-    struct remove_const {
-        using type = T;
-    };
-    template<class T>
-    struct remove_const<const T> {
-        using type = T;
-    };
+    //type_traits.h中已经实现
+    // template<class T>
+    // struct remove_const {
+    //     using type = T;
+    // };
+    // template<class T>
+    // struct remove_const<const T> {
+    //     using type = T;
+    // };
 
     /******************实现std::forward(完美转发)************ */
     template<class T>

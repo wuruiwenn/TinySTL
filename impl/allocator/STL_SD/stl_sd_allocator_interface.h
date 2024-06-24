@@ -32,7 +32,7 @@ namespace wrwSTL
     template<class T, class... ArgsType>
     inline void _construct(T* p, ArgsType... args)
     {
-        new(p) T(wrwSTL::forward<Args>(args)...);
+        new(p) T(wrwSTL::forward<ArgsType>(args)...);
     }
 
     template<class T>
@@ -73,23 +73,23 @@ namespace wrwSTL
             // 然后强转为(T*)类型
         }
         void deallocate(T* ptr) {//内存释放
-            _deallocate(ptr);
+            wrwSTL::_deallocate(ptr);
         }
         void construct(T* ptr, const S& val) {//对象构建
-            _construct(ptr, val);
+            wrwSTL::_construct(ptr, val);
         }
         void construct(T* ptr) {
-            _construct(ptr);
+            wrwSTL::_construct(ptr);
         }
 
         //特殊在class基础上加一个模板
         template<class... ArgsType>
         void construct(T* ptr, ArgsType... args) {
-            _construct(ptr, args);
+            wrwSTL::_construct(ptr, args...);
         }
 
         void destroy(T* ptr) {//对象销毁
-            _destroy(ptr);
+            wrwSTL::_destroy(ptr);
         }
     };
 } //namspace wrwSTL

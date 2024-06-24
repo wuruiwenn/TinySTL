@@ -18,10 +18,17 @@ namespace wrwSTL
     // ==================construct：构造对象==========================
     // placement new 机制
     template<class T, class S>
-    inline void construct(T* ptr, const S& val)
-    {
+    inline void construct(T* ptr, const S& val) {
         new (ptr) T(val);
     }
+
+    //construct的一些重载
+    template<class T, class ...ArgsType>
+    inline void construct(T* ptr, ArgsType ...args) {
+        wrwSTL::construct(ptr, wrwSTL::forward<ArgsType>(args)...);
+    }
+
+
 
 
     // ==================destroy：将对象析构==========================

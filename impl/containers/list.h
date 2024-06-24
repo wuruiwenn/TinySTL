@@ -189,7 +189,8 @@ namespace wrwSTL
 
         //创建一个节点
         //显然要调用 分配器 进行内存分配+节点对象构建
-        void create_node(const value_type& v);
+        template<class ...ArgsType>
+        void create_node(ArgsType&& ...args);
 
     private://list的成员
         node_ptr head;
@@ -207,12 +208,11 @@ namespace wrwSTL
         }
     public:
         node_ptr push_back(const value_type& val) {
-            if (head == nullptr) {
-
-            }
-            node_ptr link_node = create_node(val);
-
-            ++size;
+            // if (head == nullptr) {
+            //     //
+            // }
+            // node_ptr link_node = create_node(val);
+            // ++size;
         }
     };
 
@@ -237,11 +237,16 @@ namespace wrwSTL
         //更新tail指向最后一个节点
     }
 
+    //创建节点
+    //意味着需要调用分配器进行内存分配、对象构建
     template<class T>
-    void list<T>::create_node(const value_type& v)
+    template<class ...ArgsType>
+    void list<T>::create_node(ArgsType&& ...args)
     {
         auto p = default_allocator::allocate(1);//内存分配
         // default_allocator::construct();//对象构建，下次从这里开始
+        // default_alloc_template::constr
+        default_allocator::construct(p, args);
     }
 
 }
