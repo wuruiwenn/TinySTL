@@ -76,7 +76,7 @@ namespace wrwSTL
     // void (*malloc_alloc_template::malloc_alloc_oom_handler_ptr)() = NULL;
     // 初始化为空指针，即没有指向任何实体函数
     //客户端应该是可以在此指定具体的外部的oom处理函数
-    inline void (*malloc_alloc_template::malloc_oom_handler_ptr)() = 0;
+    inline void (*malloc_alloc_template::malloc_oom_handler_ptr)() = nullptr;
 
     //在类外部，初始化类内声明的成员函数oom_alloc
     inline void* malloc_alloc_template::oom_alloc(size_t n) {
@@ -88,14 +88,13 @@ namespace wrwSTL
             if (my_malloc_handler == 0) {//如果外部没有指定oom处理程序，直接抛异常
                 // throw std::bad_alloc;
                 // __THROW_BAD_ALLOC;
-                std::cout << "bad alloc Error.\n";
+                std::cout << "[Error]: bad alloc.\n";
                 exit(1);
             }
             my_malloc_handler();//通过函数指针 执行实际函数
             ret = malloc(n);//重新执行内存分配
-            if (ret) {
+            if (ret)
                 return ret;
-            }
         }
     }
 
@@ -107,14 +106,13 @@ namespace wrwSTL
         for (;;) {
             my_malloc_handler = malloc_oom_handler_ptr;
             if (my_malloc_handler == 0) {//如果外部没有指定oom处理程序，直接抛异常
-                std::cout << "bad realloc Error.\n";
+                std::cout << "[Error]: bad alloc.\n";
                 exit(1);
             }
             my_malloc_handler();//执行oom处理程序
             ret = realloc(loc, n);//重新分配内存
-            if (ret) {
+            if (ret)
                 return ret;
-            }
         }
     }
 
@@ -143,7 +141,8 @@ namespace wrwSTL
     private:
         //将输入字节数bytes上调至8的倍数
         static size_t round_up(size_t b) {
-            return (((b)+ALIGN - 1) & ~(ALIGN - 1));// 等价于：return ((b + ALIGN - 1) / ALIGN) * ALIGN;
+            return (((b)+ALIGN - 1) & ~(ALIGN - 1));
+            // 等价于：return ((b + ALIGN - 1) / ALIGN) * ALIGN;
         }
         //根据输入字节数bytes，返回应该使用16个free_list中的哪一个free_list
         // free_list[16] = [8 16 24 32 40 48 56 64 72 80 88 96 104 112 120 128]
@@ -175,6 +174,7 @@ namespace wrwSTL
     };
 
     // start_free、end_free用来标记内存池中大块内存的起始与末尾位置
+    // 内存池开始、结束的位置
     char* alloc::start_free = nullptr;
     char* alloc::end_free = nullptr;
 
@@ -217,15 +217,18 @@ namespace wrwSTL
     }
 
     //注意传入的参数n
-    //这里表达意义是：allocate分配字节数为n的内存块，free_list上没有
+    //这里表达意义是：allocate需分配字节数为n的<1个>内存块，但free_list[i]上没有
     //因而需要执行refill(具体应该是chunk_alloc)，
-    // 从内存池中取 <nobjs个> <大小为n> 的内存块来接到free_list上
+    // 从内存池中取 <nobjs个> <大小为n> 的内存块来接到free_list[i]上
     // 所以实际上从内存池取的数据量应该是 = nobjs*n 个字节
     void* alloc::refill(size_t n) {
         size_t nobjs = NObjs;
         char* chunk = chunk_alloc(n, nobjs);
 
-        //如果chunk_alloc只拿到一个内存块，则直接返回给调用者，无需挂到free_list的链表上
+        //此时nobjs已经被chunk_alloc更新
+
+        // 如果chunk_alloc只拿到一个<大小为n的内存块>，
+        // 则直接返回给调用者，无需挂到free_list[i]的链表上
         if (nobjs == 1) {
             return chunk;
         }
@@ -233,25 +236,23 @@ namespace wrwSTL
 
         //第0个内存块，作为结果返回给客户端
         obj* ret = (obj*)(chunk);
+
         //从第1个内存块开始，开始依次挂到free_list上去
-
-        //注意一个问题，refill(n)：n是所需分配的字节数
-        //nobjs是分配得到的内存块数，每个内存块占n个字节空间
-
         //先找到应该把新节点挂到free_list哪个位置：free_list[i]
         //然后初始化该位置上的头结点是谁
-        //这里是设定将chunk的第1个内存块，作为新的挂到free_list[i]上的头结点
-        //chunk往后移动n个字节，正好就是第1个内存块
+        //chunk往后移动n个字节，正好就是第1个内存块，将他挂到free_list[i]上去，就是增加节点的操作
         size_t i = free_list_indx(n);
         free_list[i] = (obj*)(chunk + n);
 
         //对于剩余的获取的内存块，依次挂到free_list[i]链表上去
         //链表操作：
-        obj* cur_obj = nullptr;//标识当前新链表的尾结点是谁，实时更新
-        cur_obj = (obj*)(chunk);
-        for (int i = 1;;++i) {
+        // obj* cur_obj = nullptr;//标识当前新链表的尾结点是谁，实时更新
+        // cur_obj = (obj*)(chunk + n);
+        obj* cur_obj = free_list[i];
+        for (int i = 1;;++i)
+        {
             obj* tmp = (obj*)((char*)cur_obj + n);//标识当前访问节点的下一个，即等待插入的新节点
-            if (i == nobjs - 1) {//如果是最后一个新节点
+            if (i == nobjs - 2) {//如果是最后一个新节点
                 cur_obj->next = tmp;
                 tmp->next = nullptr;
                 break;
@@ -271,7 +272,8 @@ namespace wrwSTL
         size_t total_need_bytes = n * nobjs;//挂到free_list上的总的字节数，这个值是用来更新内存池的大小的
         size_t pool_left = end_free - start_free;//当前内存池中剩余的未使用字节数
         char* ret;//返回申请内存空间的首地址
-        if (pool_left >= total_need_bytes) {//内存池剩余空间完全满足需要
+        if (pool_left >= total_need_bytes) //内存池剩余空间完全满足需要
+        {
             ret = start_free;
             start_free = start_free + total_need_bytes;
             //total_need_bytes是需要被分配出去的，即已分配。
@@ -281,21 +283,24 @@ namespace wrwSTL
             // 只需要更新内存池的有效起点即可
             return ret;
         }
-        else if (pool_left >= n) {//内存池资源不足，但是仍可满足本次分配的需求，足够供应一个或以上的区块
-            nobjs = pool_left / n;
+        else if (pool_left >= n)//内存池资源不足，但是仍可满足本次分配的需求，足够供应一个或以上的区块
+        {
+            nobjs = pool_left / n;//可以拿到的大小为n的内存块的数量
             total_need_bytes = nobjs * n;
             ret = start_free;
             start_free = start_free + total_need_bytes;//更新内存池的起点
             return ret;
         }
-        else {
+        else
+        {
             // 内存池空间不足，连一块小块内存都不能提供，不能满足内存分配的需求
             // 则向 <系统堆> 求助，<先往内存池中补充空间，然后返回内存申请的需求>
 
             //首先，最大化利用内存池的内存
             //这个if可不要，只是为了最大化利用内存空间，把内存池仅有的很少的内存块，挂到free_list上去
             // 如果内存池有剩余空间(该空间一定是8的整数倍)，将该空间挂到free_list对应哈希桶中
-            if (pool_left > 0) {
+            if (pool_left > 0)
+            {
                 //把这个内存池中的仅有的内存块，挂到 free_list上去
                 int i = free_list_indx(pool_left);
                 ((obj*)start_free)->next = free_list[i];
@@ -315,7 +320,8 @@ namespace wrwSTL
             //从 <堆中> 申请内存，放入内存池，此时内存池完全是空的
             // 所以应该更新内存池的首部+尾部，start_free、end_free
             start_free = (char*)::malloc(bytes_to_get);
-            if (start_free) {//如果从堆中申请内存成功
+            if (start_free) //如果从堆中申请内存成功
+            {
                 heap_size += bytes_to_get;
                 end_free = start_free + bytes_to_get;
                 //内存池起点，结束位置已经更新完毕，可以重新进行chunk_alloc分配内存了
@@ -328,7 +334,8 @@ namespace wrwSTL
 
             //从 <free_list上> 取下可用内存块，放入内存池，此时内存池完全是空的
             // 所以，应该更新内存池的首部+尾部，start_free、end_free
-            for (int s = n;s <= MAX_BYTES;s += ALIGN) {
+            for (int s = n;s <= MAX_BYTES;s += ALIGN)
+            {
                 int i = free_list_indx(s);
                 obj* p = free_list[i];//p是当前可用的内存块，可放入内存池中利用
                 if (0 != p) {
@@ -341,7 +348,7 @@ namespace wrwSTL
             }
         }
     }
-}
+} // namespace wrwSTL
 
 
 

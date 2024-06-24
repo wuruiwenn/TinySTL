@@ -45,16 +45,21 @@ namespace wrwSTL
     class allocator
     {
     public:
-        static T* allocate();//分胚一个目标对象的内存
+        static T* allocate();//分配一个目标对象的内存
         static T* allocate(size_t n);//分配指定个数个目标对象的内存
         static void deallocate(T* ptr);
 
         static void construct(T* ptr, const T& val);
+
+        template<class... ArgsType>
+        static void construct(T* ptr, ArgsType&& ...args);
+
         static void destroy(T* ptr);
         static void destroy(T* first, T* last);
     };
 
     //类 std::allocator 的定义(实现)
+    /**************内存分配******************/
     template<class T>
     inline T* allocator<T>::allocate() {
         return static_cast<T*>(::operator new(sizeof(T)));
@@ -73,12 +78,20 @@ namespace wrwSTL
         ::operator delete(ptr);
     }
 
+    /***************对象构建******************/
     template<class T>
     inline void allocator<T>::construct(T* ptr, const T& val) {
         // new(ptr) T(val);
         // wrwSTL::construct<T, T>(ptr, val);
         wrwSTL::construct(ptr, val);
         //经过测试，这里加不加模板都没问题，应该是会默认给加上的
+    }
+
+    template<class T>
+    template<class ...ArgsType>
+    inline void allocator<T>::construct(T* ptr, ArgsType&& ...args)
+    {
+        wrwSTL::construct(ptr, wrwSTL::forward<ArgsType>(args)...);
     }
 
     template<class T>
@@ -91,5 +104,5 @@ namespace wrwSTL
     inline void allocator<T>::destroy(T* first, T* last) {
         wrwSTL::destroy(first, last);
     }
-}
+}  // namespace wrwSTL
 #endif

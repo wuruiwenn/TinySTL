@@ -31,7 +31,7 @@ namespace wrwSTL
         using is_POD_type = _false_type;
     };
 
-    //以下全部：是一些内置类型的 traits模板-特化
+    //以下全部：是一些内置类型的 traits模板- 特化版本
     template<>
     struct _type_traits<bool>
     {
