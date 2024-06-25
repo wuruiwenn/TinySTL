@@ -246,7 +246,6 @@ namespace wrwSTL
         auto p = default_allocator::allocate(1);//内存分配
         default_allocator::construct(p, args);//对象构建
     }
-
 }
 
 
