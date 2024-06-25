@@ -102,8 +102,5 @@ namespace wrwSTL
         static void construct(T* ptr, ArgsType&& ...args) {
             return wrwSTL::construct(ptr, args);
         }
-        // 这个地方可能有问题，外部default_allocator需要传入2个参数，一个是关于内存分配的T
-        //     一个是 对象构建的参数S，参数S可能还必须是一个 Args...可变参数
-        //     比如是构建User对象，那需要传入 名字，年龄，地址等
-    }
+    };
 }

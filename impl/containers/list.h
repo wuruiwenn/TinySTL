@@ -244,9 +244,7 @@ namespace wrwSTL
     void list<T>::create_node(ArgsType&& ...args)
     {
         auto p = default_allocator::allocate(1);//内存分配
-        // default_allocator::construct();//对象构建，下次从这里开始
-        // default_alloc_template::constr
-        default_allocator::construct(p, args);
+        default_allocator::construct(p, args);//对象构建
     }
 
 }

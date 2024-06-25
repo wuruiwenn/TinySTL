@@ -37,6 +37,12 @@ namespace wrwSTL
     //     using type = T;
     // };
 
+    /******************实现std::move************ */
+    template<class T>
+    typename wrwSTL::remove_reference<T>::type&& move(T&& t) {
+        return static_cast<typename wrwSTL::remove_reference<T>::type&&>(t);
+    }
+
     /******************实现std::forward(完美转发)************ */
     template<class T>
     T&& forward(typename wrwSTL::remove_reference<T>::type& arg) noexcept {

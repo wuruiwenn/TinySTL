@@ -23,8 +23,8 @@ namespace wrwSTL
     }
 
     //construct的一些重载
-    template<class T, class ...ArgsType>
-    inline void construct(T* ptr, ArgsType ...args) {
+    template<class T, class... ArgsType>
+    inline void construct(T* ptr, ArgsType... args) {
         wrwSTL::construct(ptr, wrwSTL::forward<ArgsType>(args)...);
     }
 
