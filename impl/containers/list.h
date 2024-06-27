@@ -12,14 +12,6 @@
 namespace wrwSTL
 {
     //一些前置操作，主要是traits
-
-    //声明
-    // template<class T>
-    // struct list_node_base;
-
-    // template<class T>
-    // struct list_node;
-
     //我最终用于实现list的是这个node
     //按自己想法实现的
     template<class T>
@@ -32,68 +24,25 @@ namespace wrwSTL
     //那么在class list中就可以进一步萃取：typedef typename node_traits<T>::NodePtrType _NodePtrType;
     template<class T>
     struct node_traits {
-        // typedef list_node_base<T>* base_ptr;
-        // typedef list_node<T>* node_ptr;
-        //或者用 using，一样的，目的就是 定义 类型别名，实现traits
-        // using value_type = T;
-        // using node_ptr = node<T>*;
         typedef node<T>* node_ptr;
+        // using node_ptr = node<T>*;
     };
 
     template<class T>
-    struct base_t_traits {
+    struct base_T_traits {
         typedef T value_type;
         typedef T& reference;
         typedef T* pointer;
     };
 
     /*
-        List的节点结构
+        List的节点结构：Node
     */
-    // template<class T>
-    // struct list_node_base
-    // {
-    //     typedef typename node_traits<T>::base_ptr base_ptr;
-    //     typedef typename node_traits<T>::node_ptr node_ptr;
-
-    //     list_node_base* pre;
-    //     list_node_base* next;
-
-    //     list_node_base() = default;
-
-    //     base_ptr self() {
-    //         return static_cast<base_ptr>(&*this);
-    //     }
-
-    //     node_ptr as_node() {
-    //         return static_cast<node_ptr>(self());
-    //     }
-    // };
-
-    // template<class T>
-    // struct list_node :list_node_base<T> {
-    //     typedef typename node_traits<T>::base_ptr base_ptr;
-    //     typedef typename node_traits<T>::node_ptr node_ptr;
-
-    //     T value;//节点的内容
-
-    //     list_node(T&& v)
-    //         :value(std::move(v))
-    //     {}
-
-    //     node_ptr self() {
-    //         return static_cast<node_ptr>(&*this);
-    //     }
-    //     base_ptr as_base() {
-    //         return static_cast<base_ptr>(&*this);
-    //     }
-    // };
-
     template<class T>
     struct node {
     private:
         using node_ptr = node_traits<T>::node_ptr;
-        using value_type = base_t_traits<T>::value_type;
+        using value_type = base_T_traits<T>::value_type;
     public:
         value_type value;
         node_ptr prev;
@@ -111,11 +60,8 @@ namespace wrwSTL
         typedef typename base_t_traits<T>::value_type value_type;
         typedef typename base_t_traits<T>::pointer pointer;
         typedef typename base_t_traits<T>::reference reference;
-
         typedef typename node_traits<T>::node_ptr node_ptr;
-
         typedef list_iterator<T> self;
-
     private:
         node_ptr obj; //迭代器和目标对象关联的指针
     public:
@@ -124,7 +70,6 @@ namespace wrwSTL
         list_iterator(node_ptr nodePtr)
             :obj(nodePtr) {}
     public:
-
         //重要操作符重载
         node_ptr operator->() {
             return obj;
@@ -132,31 +77,26 @@ namespace wrwSTL
         reference operator*() {
             return obj->value;
         }
-
         self& operator++() {
             wrwSTL_DEBUG(obj != nullptr);
             obj = obj->next;
             return *this;
         }
-
         self operator++(int) {
             self tmp = *this;
             ++(*this);
             return tmp;
         }
-
         self& operator--() {
             wrwSTL_DEBUG(obj != nullptr);
             obj = obj->prev;
             return *this;
         }
-
         self operator--(int) {
             selft tmp = *this;
             --(*this);
             return tmp;
         }
-
         //迭代器  == ，!=  比较操作符
         bool operator==(const self& other) {
             return obj == other.obj;
@@ -166,15 +106,21 @@ namespace wrwSTL
         }
     };
 
-
-    // template<class T, class Alloc = alloc>
+    /*
+        List
+    */
     template<class T>
     class list
     {
-    private:
+    private://list的成员
+        node_ptr head;
+        node_ptr tail;
+        size_type size;
+
+    private: //traits
         typedef typename node_traits<T>::node_ptr node_ptr;
-        typedef typename base_t_traits<T>::value_type value_type;
-        typedef int size_type;
+        typedef typename base_T_traits<T>::value_type value_type;
+        // typedef int size_type;
     private:
         typedef list_iterator<T> iterator;//list_iterator
         typedef default_allocator<T> allocator_type;
@@ -182,37 +128,32 @@ namespace wrwSTL
 
     private://构建list对象的辅助函数
         // 用 n 个元素初始化list容器
-        void fill_init(size_type n, const value_type& v);
+        void fill_init(int n, const value_type& v);
 
         //在某节点后创建k个节点，节点内容为v
-        void link_after_node(node_ptr node, size_type k, const value_type& v);
+        void link_after_node(node_ptr node, int k, const value_type& v);
 
-        //创建一个节点
-        //显然要调用 分配器 进行内存分配+节点对象构建
-        template<class ...ArgsType>
-        void create_node(ArgsType&& ...args);
 
-    private://list的成员
-        node_ptr head;
-        node_ptr tail;
-        size_type size;
+        /*
+            创建一个节点
+            根据传入的值，创建一个新节点，返回指向该节点的指针
+            显然要调用 分配器STL alloc 进行内存分配+节点对象构建
+         */
+        template<class... ArgsType>
+        node_ptr create_node(ArgsType&&... args);
+
     public://构造函数
-        list()
-        {
+        list() {}
 
-        }
         // 用 n 个元素初始化容器
-        list(size_type n, const value_type& v) //list<int> list(5,9);
+        list(int n, const value_type& v) //list<int> list(5,9);
         {
             fill_init(n, v);
         }
     public:
         node_ptr push_back(const value_type& val) {
-            // if (head == nullptr) {
-            //     //
-            // }
-            // node_ptr link_node = create_node(val);
-            // ++size;
+            //create_node
+            //push
         }
     };
 
@@ -221,7 +162,7 @@ namespace wrwSTL
     // 用 n 个元素初始化list容器
     // 显然要调用 分配器alloc进行内存分配和node节点对象构建
     template<class T>
-    void list<T>::fill_init(size_type n, const value_type& v)
+    void list<T>::fill_init(int n, const value_type& v)
     {
         head = default_allocator::allocate(1);//用分配器分配内存，而不是new Node()
         link_after_node(head, n - 1, v);
@@ -230,7 +171,7 @@ namespace wrwSTL
 
     //在某节点后创建k个节点
     template<class T>
-    void list<T>::link_after_node(node_ptr node, size_type k, const value_type& v)
+    void list<T>::link_after_node(node_ptr node, int k, const value_type& v)
     {
         auto p = create_node(v);
 

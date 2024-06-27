@@ -59,7 +59,7 @@ namespace wrwSTL
     class simple_alloc
     {
     public:
-        static T* allocate(size_t n) {
+        static T* allocate(int n) { //这个n，永远u用户输入的，是所需分配 目标对象T 的个数，而不是总字节数
             return (n == 0) ? (0 : (T*)Alloc::allocate(n * sizeof(T)));
         }
         static T* allocate(void) {

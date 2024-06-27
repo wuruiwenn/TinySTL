@@ -41,6 +41,7 @@ namespace wrwSTL
     public:
         //内存分配
         //本质调用底层：malloc()
+        //形参：n，是所需分配字节数
         static void* allocate(size_t n) {
             void* ret = malloc(n);
             if (ret == 0) {//C++11之前，使用0或NULL来标识空指针
@@ -216,8 +217,8 @@ namespace wrwSTL
         free_list[i] = pnew;
     }
 
-    //注意传入的参数n
-    //这里表达意义是：allocate需分配字节数为n的<1个>内存块，但free_list[i]上没有
+    //注意传入的参数：n
+    //这里表达意义是：allocate需分配字节数(内存大小)为n的<1个>内存块，但free_list[i]上没有
     //因而需要执行refill(具体应该是chunk_alloc)，
     // 从内存池中取 <nobjs个> <大小为n> 的内存块来接到free_list[i]上
     // 所以实际上从内存池取的数据量应该是 = nobjs*n 个字节
@@ -267,7 +268,7 @@ namespace wrwSTL
 
     //chunk_alloc做的就是：从内存池中取内存块，给free_list用
     //参数n：客户端申请分配的字节数
-    //参数nobjs：引用传递，实际能够从内存池中取得的内存块的数量，默认20，实际不一定
+    //参数nobjs：引用传递，实际能够从内存池中取得的大小为n的内存块的数量，默认20，实际不一定
     char* alloc::chunk_alloc(size_t n, size_t& nobjs) {
         size_t total_need_bytes = n * nobjs;//挂到free_list上的总的字节数，这个值是用来更新内存池的大小的
         size_t pool_left = end_free - start_free;//当前内存池中剩余的未使用字节数
@@ -294,7 +295,8 @@ namespace wrwSTL
         else
         {
             // 内存池空间不足，连一块小块内存都不能提供，不能满足内存分配的需求
-            // 则向 <系统堆> 求助，<先往内存池中补充空间，然后返回内存申请的需求>
+            // 则向 <系统堆> 求助，
+            // <先往内存池中补充空间，以初始化内存池，然后返回内存申请的需求>
 
             //首先，最大化利用内存池的内存
             //这个if可不要，只是为了最大化利用内存空间，把内存池仅有的很少的内存块，挂到free_list上去
