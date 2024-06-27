@@ -1,0 +1,3 @@
+/home/riven/Learn_in_Linux_Environment/TinySTL/build/CMakeFiles/tinySTL_EXE.dir
+/home/riven/Learn_in_Linux_Environment/TinySTL/build/CMakeFiles/edit_cache.dir
+/home/riven/Learn_in_Linux_Environment/TinySTL/build/CMakeFiles/rebuild_cache.dir

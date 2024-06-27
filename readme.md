@@ -22,3 +22,10 @@
     - 使用 `class template`实现`simple_alloc`，使用模板参数的方式传入外部的实际`alloc`，对该`alloc`的内部方法，进一步封装一下
     - 那么，在实际应用时，比如 `class vector<class T,class Alloc>`的实现，就可以在文件内 `#include "alloc_external_expose_interface.h"`来对自定义实现的分配器的对外接口进行调用了
 ---
+**<font size=3 color=GREEN>4. 一直困扰我的一个问题**</font> 
+- free_list程序中并没有初始化的地方(只有nullptr的初始化)，那么每个位置`free_list[i]`上都没有内存块，它是如何起作用的？
+  - 应该是，初始状态全部为空，然后会触发alloc的从内存池中取数据的动作，逐步初始化free_list
+- 内存池也没有地方初始化？
+  - 同理，内存池是靠`start_free、end_free`2个头尾指针维护的。实际运行过程中，程序中已经有代码：内存池没有数据会像堆进行`malloc`内存分配，逐步初始化内存池
+
+---
