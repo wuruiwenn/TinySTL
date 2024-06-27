@@ -48,4 +48,14 @@ namespace wrwSTL
     T&& forward(typename wrwSTL::remove_reference<T>::type& arg) noexcept {
         return static_cast<T&&>(arg);
     }
+
+    /******************获取对象的地址************ */
+    template<class S>
+    constexpr S* address_of(S& obj) {
+        return &obj;
+    }
+
+
+
+
 } // namespace wrwSTL

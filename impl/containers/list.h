@@ -118,15 +118,23 @@ namespace wrwSTL
         size_type size;
 
     private: //traits
-        typedef typename node_traits<T>::node_ptr node_ptr;
-        typedef typename base_T_traits<T>::value_type value_type;
+        typedef typename node_traits<T>::node_ptr       node_ptr;
+        typedef typename base_T_traits<T>::value_type   value_type;
         // typedef int size_type;
     private:
-        typedef list_iterator<T> iterator;//list_iterator
-        typedef default_allocator<T> allocator_type;
-        typedef default_allocator<list_node<T>> node_allocator; //用于list中节点的空间分配器
+        typedef list_iterator<T>                iterator;//list_iterator
+        typedef default_allocator<T>            allocator_type;
+        typedef default_allocator<node<T>>      node_allocator; //用于list中节点的空间分配器
 
     private://构建list对象的辅助函数
+        /*
+            创建一个节点
+            根据传入的值，创建一个新节点，返回指向该节点的指针
+            显然要调用 分配器STL alloc 进行内存分配+节点对象构建
+        */
+        template<class... ArgsType>
+        node_ptr create_node(ArgsType&&... args);
+
         // 用 n 个元素初始化list容器
         void fill_init(int n, const value_type& v);
 
@@ -134,13 +142,7 @@ namespace wrwSTL
         void link_after_node(node_ptr node, int k, const value_type& v);
 
 
-        /*
-            创建一个节点
-            根据传入的值，创建一个新节点，返回指向该节点的指针
-            显然要调用 分配器STL alloc 进行内存分配+节点对象构建
-         */
-        template<class... ArgsType>
-        node_ptr create_node(ArgsType&&... args);
+
 
     public://构造函数
         list() {}
@@ -159,6 +161,19 @@ namespace wrwSTL
 
     /*************************list的一些辅助函数***************************** */
 
+    //创建节点
+    //意味着需要调用分配器进行内存分配、对象构建
+    template<class T>
+    template<class ...ArgsType>
+    typename list<T>::node_ptr list<T>::create_node(ArgsType&&... args)
+    {
+        auto p = default_allocator::allocate(1);//内存分配，1个节点对象
+        //下次从这里开始，在地址p上用construct构建对象
+        default_allocator::construct(p, args);//对象构建
+    }
+
+
+
     // 用 n 个元素初始化list容器
     // 显然要调用 分配器alloc进行内存分配和node节点对象构建
     template<class T>
@@ -173,20 +188,12 @@ namespace wrwSTL
     template<class T>
     void list<T>::link_after_node(node_ptr node, int k, const value_type& v)
     {
-        auto p = create_node(v);
+        // auto p = create_node(v);
 
         //更新tail指向最后一个节点
     }
 
-    //创建节点
-    //意味着需要调用分配器进行内存分配、对象构建
-    template<class T>
-    template<class ...ArgsType>
-    void list<T>::create_node(ArgsType&& ...args)
-    {
-        auto p = default_allocator::allocate(1);//内存分配
-        default_allocator::construct(p, args);//对象构建
-    }
+
 }
 
 
