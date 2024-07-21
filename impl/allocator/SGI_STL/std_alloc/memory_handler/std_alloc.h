@@ -43,7 +43,7 @@ namespace wrwSTL
         //本质调用底层：malloc()
         //形参：n，是所需分配字节数
         static void* allocate(size_t n) {
-            void* ret = malloc(n);
+            void* ret = malloc(n);//stdlib.h中包含realloc
             if (ret == 0) {//C++11之前，使用0或NULL来标识空指针
                 ret = oom_alloc(n);
             }
@@ -58,7 +58,7 @@ namespace wrwSTL
         //本质调用底层：realloc()
         //一般用于：在指定地址上扩展内存
         static void* reallocate(void* loc, size_t new_n) {
-            void* ret = realloc(loc, new_n);
+            void* ret = realloc(loc, new_n);//stdlib.h中包含realloc
             if (ret == NULL) {
                 ret = oom_realloc(loc, new_n);
             }
@@ -134,7 +134,7 @@ namespace wrwSTL
         //每个内存块节点，都是一个union
         union obj {
             obj* next;
-            char client_data[1];
+            char client_data[1];//接收客户端数据的指针，用1字节的char来表示[可能理解有误，有待确认]
         };
         // 整体是16个链表，每个链表用一个头结点obj来表达
         // 这里数组存的是每个链表的头结点的指针
@@ -160,7 +160,7 @@ namespace wrwSTL
         static void* refill(size_t n);
         static char* chunk_alloc(size_t n, size_t& nobjs);
     private:
-        static char* start_free;//内存池起始位置
+        static char* start_free;//内存池起始位置，一个指针，用一个字节的char来表示
         static char* end_free;//内存池结束位置
         static size_t heap_size;//申请 heap 空间附加值大小
     };
@@ -321,6 +321,8 @@ namespace wrwSTL
             //malloc就是从堆中申请内存
             //从 <堆中> 申请内存，放入内存池，此时内存池完全是空的
             // 所以应该更新内存池的首部+尾部，start_free、end_free
+
+            //调用malloc，申请堆的内存，来补充 内存池
             start_free = (char*)::malloc(bytes_to_get);
             if (start_free) //如果从堆中申请内存成功
             {
